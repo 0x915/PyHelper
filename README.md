@@ -51,9 +51,91 @@
              例如要选找 [圆角的确定按钮]，就矩形选择 [圆角的确定按钮] 但不包含左右两边的圆角部分
           (2)然后Ctrl+J拷贝图层，会得到一个新图层，双击它的文字重命名为方便后期寻找的名字，
              例如 01某界面01某按钮，可以让资源管理器按照前面的数字顺序排列显示文件，方便寻找图像
-          (3)然后选定背景图层，重复Ctrl+J拷贝图层得到所有需要的图像模板，不选背景图层就Ctrl+J空气了
-          (4)最后按住Ctrl选择所有模板图层，右键快速导出为PNG，在保存的文件夹可以看到导出的图像
+          (3)然后选定背景图层，选下一个模板再Ctrl+J拷贝图层得到所有需要的图像模板，不选背景图层就Ctrl+J空气了
+          (4)重复123到所有希望使用的模板都选完
+          (5)最后按住Ctrl选择所有模板图层，右键快速导出为PNG，在保存的文件夹可以看到导出的图像
+          (6)保存tif文件，方便以后修改，默认设置的tif会记住图层
           
+     1.3 在脚本里定义模板
+          (0)定义模板的目的是在一个对象里保存模板的图像、感兴趣区域、模拟触摸区域、注释信息、文件读取模式等
+          (1)使用definetl(图像文件集根目录, 图像文件路径, 文本注释, 感兴趣区域, 反馈触摸区域, [读取模式])
+             例如 definetl('.\\AAAA\\', 'Image.png', 'xxxxx', ...)
+          (2)读取模式支持 definetl.RGBA definetl.RGB definetl.Gray 必须套一层[]传参
+             例如 definetl(... ,[definetl.RGBA])
+          (3)感兴趣区域为元组(X1,Y1,X2,Y2)仅绝对区域，预设支持*Env.py内 roiFull(匹配0，0到1280,720全图)
+             例如 definetl(... , (0, 0, 1280, 720), (0, 0, 1280, 720), ...)
+          (!)相对区域使用*Env.py内cal(pos0, mv1, mv2, mv3, mv4)函数，其中pos0为*Env.py内mo(Enum)枚举，
+             传入pos0=mo.SELF可配置为：匹配成功的坐标为原点，经过mv1,mv2移动后，大小为宽mv3高mv4的区域
+             相似的，传入mo.LT则是图像左上角(Left-Top)为原点，mo.RB则是图像右下角(Right-Bottom)为原点
+          (4)反馈触摸区域为元组(X1,Y1,X2,Y2)可以为相对区域，预设支持*Env.py内 fbNone(不点任何区域) fbSelf(点击自己)
+             例如 definetl(... , cal(mo.SELF, -50, 90, 100, 90), ...) 
+          (!)可以在PS裁剪模板的时候，通过参考线或选区得到相应的像素坐标
+          
+     1.4 巧用字典
+          (0)字典的键值为字符串，可以使用英文之外的字符命名模板类，让后面写的自动化逻辑更清晰，例如
+             root = ".\\root\\"
+             demo = {
+               '中文:名字1' : [
+                    tl(root, "1.png", "xxxx1", roiFull, fbSelf, [tl.RGBA]),
+                    tl(root, "2.png", "xxxx2", roiFull, fbSelf, [tl.RGBA])],
+               '中文:名字2' : tl(root, "3.png", "xxxx3", roiFull, fbSelf, [tl.RGBA]),
+             }
+             识别算法(... ,demo['中文:名字1'] , ...) # 传入模板类组，匹配第一个失败就匹配第二个，以此类推
+             识别算法(... ,demo['中文:名字1'][1] , ...) # 传入模板类组的第二个模板类
+             识别算法(... ,demo['中文:名字2'] , ...) # 传入模板类组
+             
+     1.5 模板类对象
+          (0)成员列表
+             .array 图像内容
+             .ROI 感兴趣区域
+             .FB 触摸反馈区域
+             .alpha 透明蒙版，不透明图像为None
+             .space 颜色空间，参考[读取模式]
+             .width 图像宽度
+             .height 图像高度
+             
+           (1)得到引入随机的反馈坐标
+              使用*Env.py内GetFBXY(xy,tl)函数，xy为元组(x,y)
+              tl可以为模板类对象，或元组(x1,x2,y1,y2)，或*Env.py内cal()的返回值
+              例如 XY = GetFBXY(XY, tl=tl)
+              使用随机可降低被反作弊或机器人检测发现的概率
+#### 2.基本功能函数
+     2.0 基本逻辑
+         逻辑就是这个自定义脚本是怎么工作的，例如模板匹配成功后该怎么做，做完后该干什么
+         安卓模拟器和应用的运行状态是未知的，可能会卡顿。如果卡顿了，模拟触摸可能会没有效果
+         这时就需要一种反馈逻辑：识别(按钮) → 成功该干什么(点击按钮) → 干了有什么现象(按钮消失或某东西出现) → 完成
+         这一条逻辑里涉及四个算法：图像识别、虚拟触摸、等待消失、等待出现，这四个算法本项目已经提供示例
+         
+     2.1 图像识别
+         在*.MATCH.py里提供了三个函数封装和一个枚举
+            mt(Enum) 匹配函数功能开关，套[]传入param
+            matchtl(screen, tlclass, threshold=0.8, param=None) 自动匹配函数，自动选择mask()或rect()
+            mask(screen, tlclass, threshold=0.8, param=None) 透明匹配函数
+            rect(screen, tlclass, threshold=0.8, param=None) 矩形匹配函数
+         统一参数 screen 为被识别背景，tlclass 为模板类列表或模板类，threshold 为识别成功阈值
+         param 为功能开关，例如 mt.rgb为彩色识别(默认灰度)，可以使用列表同时传入多个开关，如果函数不支持会直接舍弃
+         例如 xy = matchtl(mu.GetScreen(), tl, threshold, [mt.quiet]) # 为静默不输出日志匹配
+         其中 matchtl() 支持 模板类列表 输入 和 直接模板类 输入，mask()与rect()只支持直接模板类输入无法遍历列表
+         建议直接使用 matchtl() 自动根据有无透明图层进行匹配
+         
+     2.2 虚拟触摸
+         在*.Event.py里提供一个类用于定义安卓模拟器设备，且应该在脚本主循环之前定义
+             mudevice(addr, title, inputdev)
+         参数 addr 是模拟器ADB网络IP地址端口，title 为模拟器实例窗口标题，inputdev 为触摸设备事件地址
+         使用 mudevice.inputTouch(xy, endSleep) 方法进行虚拟触摸
+     
+     2.3 等待消失和出现
+         等待少不了一个词超时，可以使用 while True 死循环实现等待，在进入死循环之前计算好超时时刻
+         例如 break_time = datetime.datetime.now() + datetime.timedelta(seconds=abs(timeout + 1) / 1000)
+         在死循环中增加超时判断强制打断死循环返回等待超时，同时还要兼顾无超时设计一直等待出现
+         例如 if timeout != 0 and datetime.datetime.now().__gt__(break_time) : return False
+         判断消失或出现的实现，其中 xyFalse 是*Env.py内预设的识别失败标志
+         出现 if xyFalse != matchtl(mu.GetScreen(), tl, threshold, [mt.quiet]) : return True
+         消失 if xyFalse == matchtl(mu.GetScreen(), tl, threshold, [mt.quiet]) : return True
+         
+#### 3.死循环路由系统
+
+     
 #### 用于学习该项目的功能模板
           基于 MEMU 测试开发的 [公主连结Re:Dive简体服] 小号每日内容自动辅助脚本 
           目前仅稍稍完善了 地下城AutoDungeon(MEMU) 下一关AutoNextLevel(MEMU)，需要自行编辑脚本切换
