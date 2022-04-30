@@ -711,8 +711,8 @@ def Login(mu, init=None) :
 
 def main() :
     # Login(MEMU)
-    # AutoNextLevel(MEMU)
-    AutoDungeon(MEMU)
+    AutoNextLevel(MEMU)
+    # AutoDungeon(MEMU)
     # AutoExplore(MEMU)
     # AutoStore(MEMU, flagStoreNR,Ignore=True)
     exit()
