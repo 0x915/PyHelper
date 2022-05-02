@@ -9,7 +9,7 @@ import win32gui
 import win32print
 from PIL import Image
 
-from _PartLogger import *
+from _logger import *
 
 pystart = datetime.datetime.now()
 

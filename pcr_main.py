@@ -2,11 +2,11 @@ import os
 
 import keyboard
 
-from PCR_Def import PCR
-from _PartEnv import *
-from _PartEvent import mudevice
-from _PartMATCH import matchtl, mt
-from _PartWin32 import GetMuHandler
+from pcr_tl import PCR
+from _public import *
+from _android import mudevice
+from _match import matchtl, mt
+from _platform import GetMuHandler
 from _basic import FlagCtrl, FlagInit, _visible, click, exist
 
 os.system("cls&&title Helper")

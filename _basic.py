@@ -1,7 +1,7 @@
 import time
 
-from _PartEnv import *
-from _PartMATCH import matchtl, mt
+from _public import *
+from _match import matchtl, mt
 
 class FlagCtrl :
     sw = 0

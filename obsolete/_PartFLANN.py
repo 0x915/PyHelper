@@ -1,4 +1,4 @@
-from _PartEnv import *
+from _public import *
 
 def FLANN(screen,target,info="",debug=False) :
     
@@ -52,7 +52,7 @@ def FLANN(screen,target,info="",debug=False) :
 
 
 if __name__ == '__main__':
-    from _PartWin32 import *
+    from _platform import *
     GetMuHandler()
     XYG = ".\\PCR1280x720\\XYG.png"
     while True : 

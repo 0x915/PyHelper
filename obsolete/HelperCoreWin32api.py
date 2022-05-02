@@ -1,4 +1,4 @@
-from _PartEnv import *
+from _public import *
 
 import win32ui
 import win32gui

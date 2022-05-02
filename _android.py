@@ -30,8 +30,8 @@
 import subprocess
 import time
 
-from _PartEnv import *
-from _PartWin32 import GetVMScreen
+from _public import *
+from _platform import GetVMScreen
 
 class mudevice :
 

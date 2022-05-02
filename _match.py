@@ -4,8 +4,8 @@ from enum import Enum
 import cv2
 import numpy
 
-from _PartEnv import cvScale, typeTL, xyFalse
-from _PartLogger import logger
+from _public import cvScale, typeTL, xyFalse
+from _logger import logger
 
 def crop(mat, tlclass) : return mat[tlclass.ROI[1] :tlclass.ROI[3], tlclass.ROI[0] :tlclass.ROI[2]]
 
@@ -218,9 +218,9 @@ def drawResult(screen, result) :
     cv2.waitKey(1000 * 2)
 
 if __name__ == '__main__' :
-    from PCR_Def import PCR
-    from _PartWin32 import GetMuHandler
-    from _PartEvent import mudevice
+    from pcr_tl import PCR
+    from _platform import GetMuHandler
+    from _android import mudevice
 
     MEMU = mudevice("127.0.0.1:21503", "(VM)", "/dev/input/event6")
     MEMU.connect()

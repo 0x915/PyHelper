@@ -73,7 +73,7 @@
 
     1.0 关于分辨率的问题
         (!)本项目 CV处理图像分辨率 和 安卓显示分辨率 不一样
-           *Env.py文件内：
+           *public.py文件内：
                 dvWidth dvHeight -> 物理分辨率(往显示器输出的)
                 uiWidth uiHeight -> 逻辑分辨率(系统界面缩放后)
                 muTitle -> 模拟器窗口的标题高度 (默认30px/200%缩放)
@@ -119,14 +119,14 @@
             definetl('.\\AAAA\\', 'Image.png', 'xxxxx', ...)
         (2)读取模式支持 definetl.RGBA definetl.RGB definetl.Gray 必须套一层[]传参
             definetl(... ,[definetl.RGBA])
-        (3)感兴趣区域为元组(X1,Y1,X2,Y2)仅绝对区域，预设支持*Env.py内 roiFull(匹配0，0到1280,720全图)
+        (3)感兴趣区域为元组(X1,Y1,X2,Y2)仅绝对区域，预设支持*public.py内 roiFull(匹配0，0到1280,720全图)
             definetl(... , (0, 0, 1280, 720), (0, 0, 1280, 720), ...)
             definetl(... , roiFull, (0, 0, 1280, 720), ...)
-        (!)相对区域使用*Env.py内cal(pos0, mv1, mv2, mv3, mv4)函数，其中pos0为*Env.py内mo(Enum)枚举，
+        (!)相对区域使用*public.py内cal(pos0, mv1, mv2, mv3, mv4)函数，其中pos0为*public.py内mo(Enum)枚举，
             传入pos0=mo.SELF可配置为：匹配成功的坐标为原点，经过mv1,mv2移动后，大小为宽mv3高mv4的区域
             传入mo.LT则是图像左上角(Left-Top)为原点，mo.RB则是图像右下角(Right-Bottom)为原点
             更多pos0参数查找本项目的mo枚举类
-        (4)反馈触摸区域为元组(X1,Y1,X2,Y2)可以为相对区域，预设支持*Env.py内 fbNone(不点任何区域) fbSelf(点击自己)
+        (4)反馈触摸区域为元组(X1,Y1,X2,Y2)可以为相对区域，预设支持*public.py内 fbNone(不点任何区域) fbSelf(点击自己)
             definetl(... , roiFull, cal(mo.SELF, -50, 90, 100, 90), ...) 
             definetl(... , roiFull, fbSelf, ...) 
         (!)可以在PS裁剪模板的时候，通过参考线或选区得到相应的像素坐标
@@ -155,8 +155,8 @@
              .height 图像高度
              
         (1)得到引入随机的反馈坐标
-           使用*Env.py内GetFBXY(xy,tl)函数，xy为元组(x,y)
-           tl可以为模板类对象，或元组(x1,x2,y1,y2)，或*Env.py内cal()的返回值
+           使用*public.py内GetFBXY(xy,tl)函数，xy为元组(x,y)
+           tl可以为模板类对象，或元组(x1,x2,y1,y2)，或*public.py内cal()的返回值
            例如 XY = GetFBXY(XY, tl=tl)
            使用随机可降低被反作弊或机器人检测发现的概率
 
@@ -183,7 +183,7 @@
 
          
      2.2 虚拟触摸
-         在*.Event.py里提供一个类用于定义安卓模拟器设备，且应该在脚本主循环运行之前执行
+         在*android.py里提供一个类用于定义安卓模拟器设备，且应该在脚本主循环运行之前执行
              mudevice(addr="IP:Port", title="xxxx")
          参数 addr 是模拟器ADB网络IP地址端口，title 为模拟器实例窗口标题，inputdev 为触摸设备事件地址
          使用 mudevice.inputTouch(xy, endSleep=退出等待float秒数) 方法进行虚拟触摸
@@ -245,13 +245,13 @@
 #### 　 定义安卓设备类
 
      用于定义模拟安卓设备的类 
-     *Event.py 内提供了如下类与方法
+     *android.py 内提供了如下类与方法
      　  定义安卓模拟器 mudevice(addr=Adb控制IP地址端口, title=模拟器窗口标题, inputdev=触摸事件输入地址)
      　  连接设备 mudevice.connect()
          发送指令 mudevice.command(单行shell指令)
          发送事件 mudevice.sendevent(事件列表)
          调试触摸 mudevice.inputTouch(数组(x,y), 结束延迟)
-         事件触摸 mudevice.eventTouch(数组(x,y), 按压时间, 重复次数, 每次结束延迟)
+         事件触摸 mudeviceandroidTouch(数组(x,y), 按压时间, 重复次数, 每次结束延迟)
            ↑ 实验性，存在adb反应慢，某些应用内无法完成单击的问题
          获取屏幕 mudevice.GetScreen()
 
@@ -270,7 +270,7 @@
 #### 　 自定义脚本资源定义
 
      用于定义被查找图像的类
-     *Env.py 内提供了如下类与方法
+     *public.py 内提供了如下类与方法
      　  定义资源 definetl(图像文件集根目录, 图像文件路径, 文本注释, 感兴趣区域, 反馈触摸区域, [读取模式])
                  例如 自定义脚本的资源存放于 AAAA文件夹下：definetl('.\\AAAA\\', 'Image.png', 'xxxxx', ....)
                  感兴趣区域与反馈触摸区域 元组(X1,Y1,X2,Y2) 是基于CV算法分辨率的像素区域

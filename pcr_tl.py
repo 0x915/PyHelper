@@ -1,4 +1,4 @@
-from _PartEnv import cal, definetl as tl, fbSelf, mo, roiFull
+from _public import cal, definetl as tl, fbSelf, mo, roiFull
 
 # root = ".\\PCR1280x720\\"
 #

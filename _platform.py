@@ -3,7 +3,7 @@ import time
 import numpy
 import win32ui
 
-from _PartEnv import *
+from _public import *
 
 window = list()
 target = dict()
